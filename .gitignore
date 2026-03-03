@@ -1,0 +1,52 @@
+# --- Security & Environment ---
+# Sensitive config files that must never be committed
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# --- Dependencies ---
+# Library files (reproducible from package.json, not needed in repo)
+node_modules/
+/jspm_packages/
+/lib-cov/
+.pnp
+.pnp.js
+
+# --- Build & Output ---
+# Compiled artifacts (e.g., aip-check build output)
+dist/
+build/
+out/
+*.exe
+*.dll
+*.so
+
+# --- Python (for examples/) ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# --- Logs & Debug ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+.pnpm-debug.log*
+
+# --- OS Specific ---
+# System-generated junk files from macOS and Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE Config ---
+# Editor settings (excluded as they are personal preferences)
+.vscode/
+.idea/
+*.swp
+*.swo
