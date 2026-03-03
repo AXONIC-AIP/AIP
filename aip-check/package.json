@@ -1,0 +1,29 @@
+{
+  "name": "@axonic/aip-check",
+  "version": "0.1.0-alpha",
+  "description": "AIP Compliance Auditor — Static analysis and validation tooling for the Agentic Interaction Protocol.",
+  "type": "module",
+  "main": "src/scanner.js",
+  "bin": {
+    "aip-check": "./bin/aip-check.js"
+  },
+  "scripts": {
+    "scan": "node ./bin/aip-check.js scan",
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "lint": "echo \"No linter configured yet\" && exit 0"
+  },
+  "keywords": [
+    "aip",
+    "ai-governance",
+    "compliance",
+    "agent-safety",
+    "ei-eex"
+  ],
+  "author": "AXONIC Inc.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ajv": "^8.17.0",
+    "chalk": "^5.4.0",
+    "commander": "^13.1.0"
+  }
+}
