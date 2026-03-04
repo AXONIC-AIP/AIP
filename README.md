@@ -131,6 +131,34 @@ All side-effects are confined to the EEX layer. This means:
 
 ---
 
+## Relation to MCP (Model Context Protocol)
+
+Anthropic's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) has established an important standard for how LLMs connect to external tools and data sources. AIP recognizes MCP's contribution and positions itself as a complementary — not competing — layer in the agentic stack.
+
+The relationship is best understood through a biological analogy:
+
+- **MCP is the Nervous System.** It solves the **connectivity** problem — how an LLM discovers, negotiates, and communicates with external tools and data. MCP defines the wiring: the standardized protocol through which an agent reaches the outside world.
+
+- **AIP is the Spinal Cord.** It solves the **governance** problem — ensuring that signals traveling through those nerves are validated, authorized, and rate-limited before they reach the muscles. AIP defines the checkpoint: the deterministic boundary that separates intent from execution.
+
+**A nervous system without a spinal cord is a seizure waiting to happen.** An LLM that can freely invoke tools through MCP — without structural governance over what those invocations are allowed to do — has no verifiable safety boundary. Conversely, a spinal cord without nerves has nothing to govern.
+
+### How AIP and MCP Work Together
+
+In an AIP-compliant architecture, MCP operates **within** the EEX (Executive Execution) layer:
+
+```
+EI (LLM) ──Intent──▶ AIP Gate ──Validated Intent──▶ EEX ──MCP──▶ Tools / Data
+```
+
+The EI generates Intents. The AIP Gate validates them. The EEX executes them — and within the EEX, MCP serves as the connectivity protocol for reaching external services. This is the intended integration pattern: **MCP provides the wiring; AIP governs the signal.**
+
+AIP is designed to function as a **governance superlayer** that can wrap any connectivity protocol — MCP, custom REST APIs, gRPC services, or direct SDK calls. The protocol is transport-agnostic. What it enforces is the structural invariant: no probabilistic system may trigger execution without passing through a deterministic validation gate.
+
+For engineers building on MCP today, adopting AIP means adding a verifiable safety boundary to your existing tool integrations — without replacing any of them.
+
+---
+
 ## Project Structure
 
 ```

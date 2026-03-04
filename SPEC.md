@@ -291,7 +291,44 @@ Authority scopes MUST be defined at agent registration time and stored in a conf
 
 ---
 
-## 10. Conformance
+## 10. Interoperability with External Protocols
+
+### 10.1 Scope
+
+AIP is a governance protocol. It is intentionally agnostic to the specific connectivity mechanisms used within the EI or EEX layers. This section defines the normative requirements for integrating AIP with external tool-connectivity protocols, with particular attention to Anthropic's Model Context Protocol (MCP).
+
+### 10.2 Relation to Model Context Protocol (MCP)
+
+MCP defines a standardized interface through which LLMs discover and invoke external tools and data sources. AIP and MCP address different layers of the agentic architecture:
+
+| Concern | MCP | AIP |
+|---------|-----|-----|
+| **Primary function** | Connectivity — how agents reach tools | Governance — how agent actions are validated |
+| **Architectural role** | Nerve pathways (signal transmission) | Spinal cord (signal governance) |
+| **Layer** | Transport / interface protocol | Structural safety boundary |
+| **Determinism requirement** | None | EEX MUST be deterministic |
+
+AIP and MCP are complementary. In an AIP-compliant system, MCP MAY be used as the connectivity protocol within the EEX layer for communicating with external services.
+
+### 10.3 Normative Requirements for MCP Integration
+
+When MCP is used within an AIP-compliant system, the following constraints MUST be observed:
+
+1. **MCP clients and servers MUST NOT bypass the AIP Gate.** The EI layer MUST NOT use MCP (or any other protocol) to invoke tools directly. All tool invocations MUST originate as Intents, pass through the AIP Gate, and be executed by the EEX layer.
+
+2. **MCP servers MUST reside within the EEX boundary.** An MCP server that exposes tool capabilities MUST be treated as an EEX component. It MUST NOT invoke LLMs, generative models, or any probabilistic reasoning system.
+
+3. **MCP tool discovery results MUST NOT override authority scopes.** If the EI discovers new tools via MCP, the availability of those tools does not implicitly grant the agent authority to invoke them. The AIP Gate's authority verification still applies.
+
+4. **MCP transport channels MUST NOT carry unvalidated Intents.** Any message that represents a request for a side-effect — regardless of the transport protocol — MUST be expressed as an AIP Intent and validated by the Gate before execution.
+
+### 10.4 Generalized Protocol Interoperability
+
+The requirements in Section 10.3 apply, by extension, to any external connectivity protocol used within an AIP-compliant system — including but not limited to REST APIs, gRPC services, WebSocket connections, and direct SDK invocations. AIP is transport-agnostic; what it governs is the boundary between intent and execution.
+
+---
+
+## 11. Conformance
 
 A system is AIP-compliant if and only if it satisfies all of the following:
 
@@ -309,6 +346,8 @@ A system is AIP-compliant if and only if it satisfies all of the following:
 ---
 
 ## Appendix A: References
+
+- [Model Context Protocol (MCP) — Anthropic](https://modelcontextprotocol.io/)
 
 - [RFC 2119 — Key words for use in RFCs](https://www.ietf.org/rfc/rfc2119.txt)
 - [JSON Schema Specification](https://json-schema.org/specification.html)
