@@ -1,4 +1,4 @@
-# AIP — Agentic Interaction Protocol
+# AIP™ — Agentic Interaction Protocol
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Status](https://img.shields.io/badge/Status-v0.1.x_Active_Development-brightgreen.svg)]()
@@ -14,11 +14,11 @@
 
 ## Author & Project Status
 
-**AIP (Agentic Interaction Protocol)** was conceived and authored by **Oto** ([@axonic_aip_oto](https://x.com/axonic_aip_oto)) as a foundational safety standard for autonomous AI systems. The protocol introduces the concept of the **Digital Spinal Cord** — a deterministic governance pathway that structurally isolates intelligence from execution — establishing a new architectural primitive for agentic AI.
+**AIP™ (Agentic Interaction Protocol)** was conceived and authored by **Oto** ([@axonic_aip_oto](https://x.com/axonic_aip_oto)) as a foundational safety standard for autonomous AI systems. The protocol introduces the concept of the **Digital Spinal Cord™** — a deterministic governance pathway that structurally isolates intelligence from execution — establishing a new architectural primitive for agentic AI.
 
 AIP is currently in **v0.1.x (Genesis Phase)**. The specification is being actively developed and refined through hands-on implementation — including tools such as `aip-check` — and direct engagement with real-world agentic architectures. This is not a theoretical exercise; AIP is designed to ship as a working standard.
 
-**Governance**: Final authority over the AIP specification rests with Oto and AXONIC. Community contributions, feedback, and constructive proposals are strongly welcomed — this protocol is built in the open, and we believe the best standards emerge through collaboration.
+**Governance**: Final authority over the AIP™ specification rests with Oto and AXONIC™. Community contributions, feedback, and constructive proposals are strongly welcomed — this protocol is built in the open, and we believe the best standards emerge through collaboration.
 
 ---
 
@@ -28,7 +28,7 @@ As AI agents gain the ability to perform real-world side-effects — writing fil
 
 AIP (Agentic Interaction Protocol) addresses this by introducing a **structural separation** between the intelligence that decides _what_ to do and the mechanism that _does_ it. This separation is not a policy layer or a prompt-engineering technique. It is a protocol-level constraint enforced through deterministic validation gates.
 
-Think of it as a **Digital Spinal Cord**: the brain (EI) sends signals, but those signals must pass through a governed transmission pathway before they reach the muscles (EEX). Without this pathway, there is no reliable way to guarantee that a complex, probabilistic system behaves within acceptable bounds.
+Think of it as a **Digital Spinal Cord™**: the brain (EI™) sends signals, but those signals must pass through a governed transmission pathway before they reach the muscles (EEX™). Without this pathway, there is no reliable way to guarantee that a complex, probabilistic system behaves within acceptable bounds.
 
 AIP defines the specification for this pathway.
 
@@ -58,9 +58,9 @@ AIP defines three structural components and the interfaces between them.
 
 | Component | Nature | Responsibility |
 |-----------|--------|---------------|
-| **EI (Executive Intelligence)** | Probabilistic | Reasoning, planning, and Intent generation. Typically an LLM or LLM-based agent. |
-| **AIP Gate** | Deterministic | Validation bridge. Enforces schema conformance, authority scope, and rate limits. |
-| **EEX (Executive Execution)** | Deterministic | Side-effect execution. File I/O, API calls, database writes, infrastructure operations. |
+| **EI™ (Executive Intelligence)** | Probabilistic | Reasoning, planning, and Intent generation. Typically an LLM or LLM-based agent. |
+| **AIP™ Gate** | Deterministic | Validation bridge. Enforces schema conformance, authority scope, and rate limits. |
+| **EEX™ (Executive Execution)** | Deterministic | Side-effect execution. File I/O, API calls, database writes, infrastructure operations. |
 
 ### Flow
 
@@ -111,9 +111,9 @@ The AIP Gate validates this structure against registered Intent schemas before f
 
 Every Intent type has a registered JSON Schema. The AIP Gate rejects any Intent that does not conform. There is no "best-effort" execution — validation is binary.
 
-### Dopamine Spike Defense
+### DSD™ (Dopamine Spike Defense)
 
-Agentic systems can enter pathological loops where the LLM generates high-frequency, repetitive requests — a pattern analogous to a dopamine feedback loop. AIP implements structural rate-limiting at the Gate level:
+Agentic systems can enter pathological loops where the LLM generates high-frequency, repetitive requests — a pattern analogous to a dopamine feedback loop. AIP™ implements structural rate-limiting at the Gate level:
 
 - **Frequency Detection**: Monitors Intent submission rate per agent per action type.
 - **Pattern Matching**: Identifies repetitive or near-duplicate Intent sequences.
@@ -381,6 +381,18 @@ Please read the [contribution guidelines](CONTRIBUTING.md) before submitting a p
 
 ---
 
+## Trademarks & Intellectual Property
+
+The following terms are trademarks owned by **Oto** and **AXONIC™**:
+
+> **AIP™**, **AXONIC™**, **Digital Spinal Cord™**, **DSD™ (Dopamine Spike Defense)**, **EI™ (Executive Intelligence)**, and **EEX™ (Executive Execution)**.
+
+- **Proprietary Terminology**: The terms "Executive Intelligence" (EI™) and "Executive Execution" (EEX™), as defined within the context of this protocol, are proprietary architectural concepts coined by the author. They describe a specific structural separation pattern unique to the AIP™ specification and are not intended as generic industry vocabulary.
+- **License Scope**: The [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) applies to the source code and specification text in this repository. **The license does NOT grant any rights** to use the above trademarks for branding, product naming, marketing materials, or competing standards without express written permission from Oto and AXONIC™.
+- **Acceptable Use**: You may reference these terms when describing compatibility with or implementation of the AIP™ protocol (e.g., "AIP™-compatible" or "implements the AIP™ specification"), provided such use does not imply endorsement by or affiliation with AXONIC™ unless explicitly authorized.
+
+---
+
 ## License
 
 This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
@@ -388,6 +400,7 @@ This project is licensed under the [Apache License 2.0](https://www.apache.org/l
 ---
 
 <p align="center">
-  <strong>AXONIC Inc.</strong><br/>
-  <em>We are building the trust layer for the agentic future.</em>
+  <strong>AXONIC™ Inc.</strong><br/>
+  <em>We are building the trust layer for the agentic future.</em><br/>
+  <sub>AIP™, Digital Spinal Cord™, DSD™, EI™, and EEX™ are trademarks of Oto and AXONIC™.</sub>
 </p>
