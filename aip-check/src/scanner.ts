@@ -297,16 +297,30 @@ async function resolveFiles(targetDir: string): Promise<string[]> {
  * @returns A structured scan result with all detected violations.
  */
 export async function scan(targetDir: string): Promise<ScanResult> {
-  const resolvedDir = path.resolve(targetDir);
+  const resolvedPath = path.resolve(targetDir);
 
-  if (!fs.existsSync(resolvedDir)) {
-    throw new Error(`Target directory does not exist: ${resolvedDir}`);
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(`Target path does not exist: ${resolvedPath}`);
   }
 
   const aiPattern = buildImportPattern(FORBIDDEN_AI_MODULES);
   const mcpImportPattern = buildImportPattern(MCP_MODULES);
   const mcpKeywordPattern = buildKeywordPattern(MCP_KEYWORDS);
-  const files = await resolveFiles(resolvedDir);
+
+  const stat = fs.statSync(resolvedPath);
+  let files: string[];
+
+  if (stat.isFile()) {
+    const ext = path.extname(resolvedPath);
+    if (TARGET_EXTENSIONS.includes(ext)) {
+      files = [resolvedPath];
+    } else {
+      files = [];
+    }
+  } else {
+    files = await resolveFiles(resolvedPath);
+  }
+
   const violations: Violation[] = [];
 
   for (const file of files) {
