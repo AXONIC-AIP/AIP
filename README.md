@@ -1,10 +1,24 @@
 # AIP — Agentic Interaction Protocol
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Status](https://img.shields.io/badge/Status-Draft_Proposal-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-v0.1.x_Active_Development-brightgreen.svg)]()
+[![Phase](https://img.shields.io/badge/Phase-Genesis-blueviolet.svg)]()
 [![Organization](https://img.shields.io/badge/Organization-AXONIC-black.svg)]()
 
+> **Status: v0.1.x — Genesis Phase / Active Development**
+> This specification is under active development. It is being refined through real-world implementation feedback and is not yet finalized.
+
 **A deterministic governance protocol that structurally decouples AI intent from execution to ensure safety, predictability, and auditability in agentic systems.**
+
+---
+
+## Author & Project Status
+
+**AIP (Agentic Interaction Protocol)** was conceived and authored by **Oto** ([@axonic_aip_oto](https://x.com/axonic_aip_oto)) as a foundational safety standard for autonomous AI systems. The protocol introduces the concept of the **Digital Spinal Cord** — a deterministic governance pathway that structurally isolates intelligence from execution — establishing a new architectural primitive for agentic AI.
+
+AIP is currently in **v0.1.x (Genesis Phase)**. The specification is being actively developed and refined through hands-on implementation — including tools such as `aip-check` — and direct engagement with real-world agentic architectures. This is not a theoretical exercise; AIP is designed to ship as a working standard.
+
+**Governance**: Final authority over the AIP specification rests with Oto and AXONIC. Community contributions, feedback, and constructive proposals are strongly welcomed — this protocol is built in the open, and we believe the best standards emerge through collaboration.
 
 ---
 

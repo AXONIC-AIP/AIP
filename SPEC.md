@@ -1,10 +1,13 @@
 # AIP — Agentic Interaction Protocol Specification
 
 **Version**: 0.1.0-draft
-**Status**: Draft Proposal
-**Authors**: AXONIC Inc.
+**Status**: Working Draft — Active Development
+**Author**: Oto ([@axonic_aip_oto](https://x.com/axonic_aip_oto))
+**Organization**: AXONIC Inc.
 **Date**: 2026-03-03
 **License**: Apache-2.0
+
+> **Note**: This specification is a **Working Draft**. It is not a finalized standard. The protocol is being actively refined through concurrent implementation efforts (including the `aip-check` compliance tooling) and real-world architectural feedback. Breaking changes may occur between minor versions during this Genesis Phase. Implementors are encouraged to track the latest revision and participate in the specification process.
 
 ---
 
