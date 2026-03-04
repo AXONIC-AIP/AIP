@@ -1,9 +1,9 @@
 /**
  * AIP Check CLI — Command-line interface for the AIP Compliance Auditor.
  *
- * Provides the `scan` command that inspects EEX-layer code for forbidden
- * AI SDK imports, enforcing the Digital Spinal Cord's invariant:
- * EEX must never directly invoke probabilistic intelligence.
+ * Provides the `scan` command that inspects code for:
+ *   - Forbidden AI SDK imports in EEX-layer code (AIP-CORE)
+ *   - MCP components placed outside the EEX boundary (AIP-V10.2)
  *
  * @module cli
  */
@@ -11,7 +11,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { scan } from "./scanner.js";
-import type { Violation } from "./scanner.js";
+import type { Violation, Severity } from "./scanner.js";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -30,26 +30,55 @@ const BANNER = `
 // Output formatting
 // ---------------------------------------------------------------------------
 
+function severityBadge(severity: Severity): string {
+  switch (severity) {
+    case "CRITICAL":
+      return chalk.bgRed.white.bold(" CRITICAL ");
+    case "ERROR":
+      return chalk.red.bold("ERROR");
+    case "WARNING":
+      return chalk.yellow.bold("WARNING");
+  }
+}
+
 function printViolation(v: Violation, index: number): void {
   console.log(
-    `  ${chalk.red.bold(`[${index + 1}]`)} ${chalk.white(v.file)}${chalk.dim(`:${v.line}`)}`
+    `  ${chalk.red.bold(`[${index + 1}]`)} ${severityBadge(v.severity)} ${chalk.dim(`(${v.ruleId})`)}`
+  );
+  console.log(
+    `      ${chalk.yellow("File:")}   ${chalk.white(v.file)}${chalk.dim(`:${v.line}`)}`
   );
   console.log(`      ${chalk.yellow("Module:")} ${chalk.red.bold(v.module)}`);
   console.log(`      ${chalk.yellow("Source:")} ${chalk.dim(v.content)}`);
+  console.log(`      ${chalk.yellow("Detail:")} ${v.message}`);
   console.log();
 }
 
 function printSummary(
   filesScanned: number,
   violations: Violation[],
-  passed: boolean
+  passed: boolean,
 ): void {
+  const criticalCount = violations.filter((v) => v.severity === "CRITICAL").length;
+  const errorCount = violations.filter((v) => v.severity === "ERROR").length;
+  const warningCount = violations.filter((v) => v.severity === "WARNING").length;
+
   console.log(
     chalk.white.bold("  ── Summary ───────────────────────────────")
   );
   console.log();
   console.log(`  Files scanned: ${chalk.white(filesScanned)}`);
-  console.log(`  Violations:    ${violations.length > 0 ? chalk.red.bold(violations.length) : chalk.green("0")}`);
+
+  if (violations.length > 0) {
+    console.log(
+      `  Violations:    ${chalk.red.bold(violations.length)}` +
+        (criticalCount > 0 ? chalk.bgRed.white.bold(` ${criticalCount} CRITICAL `) : "") +
+        (errorCount > 0 ? chalk.red(` ${errorCount} error`) : "") +
+        (warningCount > 0 ? chalk.yellow(` ${warningCount} warning`) : ""),
+    );
+  } else {
+    console.log(`  Violations:    ${chalk.green("0")}`);
+  }
   console.log();
 
   if (passed) {
@@ -59,11 +88,20 @@ function printSummary(
       )
     );
   } else {
-    console.log(
-      chalk.red.bold(
-        "  🔴 [FAILED] EI/EEX boundary violations found. EEX layer must not import AI SDKs."
-      )
-    );
+    if (criticalCount > 0) {
+      console.log(
+        chalk.red.bold(
+          "  🔴 [FAILED] CRITICAL: MCP Boundary Violations detected. See AIP Spec Section 10."
+        )
+      );
+    }
+    if (errorCount > 0) {
+      console.log(
+        chalk.red.bold(
+          "  🔴 [FAILED] EI/EEX boundary violations found. EEX layer must not import AI SDKs."
+        )
+      );
+    }
   }
   console.log();
 }
@@ -85,7 +123,7 @@ export function createProgram(): Command {
   program
     .command("scan")
     .description(
-      "Scan a directory for forbidden AI SDK imports in EEX-layer code."
+      "Scan a directory for AIP boundary violations (AI SDK imports and MCP placement)."
     )
     .argument("[dir]", "Target directory to scan", ".")
     .option(
