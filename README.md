@@ -294,29 +294,90 @@ node ./bin/aip-check.js report --format json
 
 ---
 
-## Roadmap
+## Roadmap & Ecosystem
 
-### Phase 1 — Protocol Specification & Community Review
-Define the core specification, publish the draft RFC, and gather feedback from the AI engineering community. Establish the compliance checklist and formalize the Intent schema standard.
+AIP is more than a specification. It is the foundation of an ecosystem designed to make autonomous AI systems safe enough to trust with real-world consequences.
 
-### Phase 2 — Tooling Development & Beta Release
-Build and release the `aip-check` CLI tool. Provide reference implementations in TypeScript and Python. Develop integration guides for popular agent frameworks.
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         THE AIP ECOSYSTEM                              │
+│                                                                        │
+│   OPEN SOURCE                          ENTERPRISE                      │
+│   ──────────                           ──────────                      │
+│   aip-check (CLI)                      AIP-shield (Runtime Engine)     │
+│   Protocol Spec (SPEC.md)              AIP Certified (Compliance)      │
+│   Reference Implementations            Monitoring Dashboard            │
+│   Community Extensions                 24/7 Incident Response          │
+│                                                                        │
+│   Free forever.                        For teams that cannot           │
+│   Because safety should                afford a single failure.        │
+│   never be gated.                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-### Phase 3 — Formal Certification Program
-Launch an AIP Certification Program for enterprise agent systems. Provide compliance badges, automated audit pipelines, and partnership integrations with AI platform providers.
+### The AIP Stack
+
+| Layer | Product | Status | Description |
+|-------|---------|--------|-------------|
+| **Static Governance** | `aip-check` | **Available (OSS)** | Build-time linting that enforces EI/EEX boundary isolation, detects forbidden AI SDK imports, and validates MCP placement. Free, open-source, and designed to run in any CI/CD pipeline. |
+| **Dynamic Protection** | `AIP-shield` | **Upcoming** | A high-availability runtime protection engine that can be **retrofitted** onto existing agentic systems. Deploys as a sidecar or gateway — intercepts live Intent traffic, runs DSD analysis, and enforces circuit-breaking in real time. No code rewrite required. |
+| **Certification** | `AIP Certified` | **Planned** | A formal compliance certification program for AI agent systems. Organizations that pass the AIP audit receive a verifiable badge — objective proof that their agents operate within governed safety boundaries. |
+
+### Retrofit-First Strategy
+
+Most AI safety frameworks demand that you rebuild from scratch. AIP takes the opposite approach: **add safety without breaking what works.**
+
+AIP is engineered to integrate with the infrastructure you already have:
+
+- **Running agents on OpenAI, Anthropic, or Google?** AIP wraps your existing LLM calls in a governed Intent pipeline — the model stays the same, but every action now passes through a deterministic gate.
+- **Using MCP for tool connectivity?** AIP sits above it as a governance superlayer. Your MCP servers keep running inside the EEX boundary; AIP validates every Intent before it reaches them.
+- **Custom agent framework?** `aip-check` scans any TypeScript or JavaScript codebase. `AIP-shield` intercepts at the protocol level, not the application level. No vendor lock-in. No framework dependency.
+
+The principle: **you should not have to choose between shipping fast and shipping safely.** AIP is the layer that makes both possible.
+
+### Enterprise-Grade Safety
+
+For organizations operating in high-stakes environments — financial services, critical infrastructure, healthcare, autonomous operations — AIP provides the governance guarantees that regulators and risk committees require:
+
+- **Real-time DSD (Dopamine Spike Defense)**: Continuous monitoring of agent behavior with three-level severity escalation. Runaway agents are halted before they cause economic or physical damage.
+- **Auditable Intent Trail**: Every action requested, every Gate decision, every rejection reason — captured in an append-only audit log that satisfies compliance and forensic requirements.
+- **Physical Execution Boundary**: The EI/EEX separation is not a policy — it is a structural constraint. Even a fully compromised LLM cannot execute side-effects without passing through the Gate.
+- **Kill Switch**: At critical severity, AIP-shield terminates the execution process. This is not a graceful shutdown request. It is a reflex — the Digital Spinal Cord's last line of defense.
+
+### AIP Certified: The Trust Badge for Agentic AI
+
+As autonomous AI agents become integral to business operations, the question shifts from _"Can this agent do the job?"_ to **_"Can this agent be trusted not to cause harm?"_**
+
+**AIP Certified** will provide the answer:
+
+- A standardized, auditable compliance program based on the AIP 10-Item Checklist.
+- Automated verification via `aip-check` and runtime validation via `AIP-shield`.
+- A publicly verifiable badge that signals to customers, partners, and regulators: _this system operates within governed safety boundaries._
+
+The goal is not to create a bureaucratic gate. It is to give the market a **clear, binary signal** for agent safety — the same role that SOC 2 plays for cloud security or ISO 27001 plays for information security.
+
+### Development Roadmap
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **Phase 1** — Genesis | Core protocol specification, `aip-check` CLI, reference implementations, community review | **In Progress** |
+| **Phase 2** — Hardening | `AIP-shield` runtime engine (beta), MCP integration guides, Python SDK, expanded rule set | Next |
+| **Phase 3** — Certification | AIP Certified compliance program, enterprise dashboard, automated audit pipelines | Planned |
+| **Phase 4** — Ecosystem | Partner integrations (AI platform providers, cloud vendors), language-specific SDKs, framework adapters | Vision |
 
 ---
 
 ## How to Contribute
 
-AIP is an open protocol. Contributions are welcome from anyone interested in building safer agentic systems.
+AIP is an open protocol. Contributions are welcome from anyone committed to building safer agentic systems.
 
 - **Specification Feedback**: Open an issue to discuss protocol design decisions.
 - **Reference Implementations**: Submit examples of AIP-compliant architectures in any language.
 - **Tooling**: Contribute to the `aip-check` CLI or build complementary tools.
 - **Compliance Testing**: Help expand the compliance checklist and test suite.
+- **Integrations**: Build AIP adapters for your preferred agent framework or AI platform.
 
-Please read the contribution guidelines before submitting a pull request. All contributions must be in English.
+Please read the [contribution guidelines](CONTRIBUTING.md) before submitting a pull request. All contributions must be in English.
 
 ---
 
@@ -328,5 +389,5 @@ This project is licensed under the [Apache License 2.0](https://www.apache.org/l
 
 <p align="center">
   <strong>AXONIC Inc.</strong><br/>
-  Building the governance layer for autonomous systems.
+  <em>We are building the trust layer for the agentic future.</em>
 </p>
