@@ -159,6 +159,84 @@ For engineers building on MCP today, adopting AIP means adding a verifiable safe
 
 ---
 
+## The AIP Safety Stack
+
+AIP provides two complementary layers of defense — one at build time, one at runtime — forming a complete safety stack for agentic systems.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    THE AIP SAFETY STACK                         │
+│                                                                 │
+│  ┌───────────────────────┐   ┌────────────────────────────────┐ │
+│  │  A. STATIC GOVERNANCE │   │  B. DYNAMIC PROTECTION         │ │
+│  │     aip-check         │   │     AIP-shield (The Reflex Arc)│ │
+│  │                       │   │                                │ │
+│  │  Build / Deploy time  │   │  Runtime / Live traffic        │ │
+│  │  Source code linting  │   │  Active interception           │ │
+│  │                       │   │                                │ │
+│  │  "Does the code       │   │  "Is the agent behaving       │ │
+│  │   respect the wall?"  │   │   sanely right now?"           │ │
+│  └───────────────────────┘   └────────────────────────────────┘ │
+│                                                                 │
+│  Together: Structural safety from first line of code            │
+│            to last millisecond of execution.                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### A. Static Governance: `aip-check`
+
+| Attribute | Detail |
+|-----------|--------|
+| **Nature** | Build-time / deployment-time linting |
+| **Goal** | Architecture enforcement — verify EI/EEX separation before code ships |
+| **Mechanism** | Static analysis of source code: detects prohibited AI SDK imports in EEX modules and MCP components placed outside the EEX boundary |
+| **Rules** | `AIP-CORE` (AI SDK in EEX), `AIP-V10.2` (MCP boundary violations) |
+
+`aip-check` answers the question: **"Is this codebase structurally compliant?"** It catches violations at the earliest possible moment — before a single line of code executes.
+
+### B. Dynamic Protection: AIP-shield (The Reflex Arc)
+
+| Attribute | Detail |
+|-----------|--------|
+| **Nature** | Runtime protection / active interception |
+| **Goal** | Real-time prevention of agent "seizures" — runaway loops, token hemorrhage, semantic cycling |
+| **Mechanism** | The AIP Gate monitors live Intent traffic, applying the **DSD (Dopamine Spike Defense)** algorithm to detect and halt pathological agent behavior |
+| **Response** | `429 SPIKE_DETECTED` with mandatory cooldown; in critical cases, physical termination of the EEX process |
+
+AIP-shield answers the question: **"Is this agent about to cause damage?"** It is the Digital Spinal Cord's reflex arc — an involuntary, deterministic response that fires before the brain (EI) can overrule it.
+
+```
+                          ┌─────────────────────────┐
+                          │      AIP-shield          │
+    Intent                │   ┌─────────────────┐   │              Side-Effect
+ EI ─────────────────────▶│   │  DSD Engine      │   │─────────────▶ EEX
+   (LLM)                  │   │                   │   │           (Deterministic)
+                          │   │  ▸ Velocity Spike │   │
+                          │   │  ▸ Token Hemorrhage│  │
+                          │   │  ▸ Semantic Loop   │  │
+                          │   └────────┬──────────┘   │
+                          │            │              │
+                          │     SPIKE? ▼              │
+                          │   ┌─────────────────┐     │
+                          │   │ Circuit Breaker  │     │
+                          │   │ 429 + Cooldown   │     │
+                          │   │ or KILL (critical)│    │
+                          │   └─────────────────┘     │
+                          └─────────────────────────┘
+```
+
+The three DSD detection metrics:
+
+- **Velocity Spike**: The agent is firing Intents faster than any legitimate workflow would require (e.g., >10 Intents/second). This indicates a reasoning loop or an adversarial prompt injection driving rapid execution.
+
+- **Token Hemorrhage**: Token consumption rate is accelerating abnormally — the agent is generating increasingly large or frequent payloads, burning through compute budget at a rate that suggests loss of coherent control.
+
+- **Semantic Loop**: The agent is submitting Intents that are semantically identical or near-identical to recent submissions. This is the hallmark of an agentic feedback loop — the AI equivalent of a muscle spasm.
+
+When any metric crosses its threshold, the reflex fires: the agent is halted, cooled down, and — if the situation is critical enough — the EEX process is terminated entirely. No negotiation. No retry. The spinal cord does not ask the brain for permission.
+
+---
+
 ## Project Structure
 
 ```

@@ -239,6 +239,8 @@ All error responses from the AIP Gate MUST conform to the following structure:
 | `NONCE_REUSED` | The provided nonce has been seen before within the replay window. | Reject |
 | `GATE_AUDIT_FAILURE` | The audit logging system is unavailable. Intent cannot be safely processed. | Reject |
 | `INTENT_TIMEOUT` | The EEX did not return a result within the configured timeout. | Fail |
+| `EEX_TERMINATED_BY_DSD` | The EEX process was terminated by a Level 3 DSD event. | Kill |
+| `AGENT_QUARANTINED` | The agent has been quarantined after a critical DSD event. Requires manual operator clearance. | Reject (permanent until cleared) |
 
 ### 8.2 Success Response
 
@@ -328,7 +330,156 @@ The requirements in Section 10.3 apply, by extension, to any external connectivi
 
 ---
 
-## 11. Conformance
+## 11. Runtime Protection: AIP-shield & Dopamine Spike Defense
+
+### 11.1 The AIP Gate Invariant
+
+The AIP Gate is the singular enforcement point of the Digital Spinal Cord. It operates under the following invariant:
+
+> **Every Intent transmitted from the EI layer to the EEX layer MUST pass through the AIP Gate. There are no exceptions, no bypass channels, and no "trusted" fast paths.**
+
+The AIP Gate MUST satisfy the following structural requirements:
+
+1. The Gate MUST be capable of **physically terminating the execution signal** — that is, preventing an Intent from reaching the EEX — if any validation check fails. This is not a logging-only mechanism; it is an active interception layer.
+2. The Gate MUST operate **synchronously** in the Intent path. Asynchronous or "eventual" validation is non-compliant. The EEX MUST NOT receive an Intent before the Gate has completed all checks.
+3. The Gate MUST NOT depend on the EI layer for its decision logic. It MUST be fully deterministic and MUST NOT invoke any probabilistic system.
+4. The Gate MUST maintain its own state (counters, nonce registries, circuit breaker states) independently of both EI and EEX.
+
+```
+┌──────────┐       ┌──────────────────────────────────────────┐       ┌──────────┐
+│          │       │              AIP Gate                     │       │          │
+│          │       │  ┌────────────────────────────────────┐   │       │          │
+│   EI     │ Intent│  │         DSD Engine                 │   │Validated   EEX  │
+│  (LLM)   │──────▶│  │                                    │   │──Intent─▶│(Deterministic)
+│          │       │  │  1. Schema Validation               │   │       │          │
+│          │       │  │  2. Authority Verification           │   │       │          │
+│          │       │  │  3. Nonce Replay Check               │   │       │          │
+│          │       │  │  4. DSD: Velocity Spike              │   │       │          │
+│          │◀──────│  │  5. DSD: Token Hemorrhage            │   │       │          │
+│          │ 429 / │  │  6. DSD: Semantic Loop               │   │       │          │
+│          │ Error │  │                                    │   │       │          │
+│          │       │  │  ANY FAIL ──▶ REJECT + LOG          │   │       │          │
+│          │       │  │  ALL PASS ──▶ FORWARD ──────────────┼───┘       │          │
+│          │       │  └────────────────────────────────────┘   │       │          │
+└──────────┘       └──────────────────────────────────────────┘       └──────────┘
+                                      │
+                                      ▼
+                               ┌──────────────┐
+                               │  Audit Log   │
+                               │ (append-only)│
+                               └──────────────┘
+```
+
+### 11.2 DSD (Dopamine Spike Defense) Algorithm
+
+Dopamine Spike Defense is the core runtime protection algorithm of the AIP Gate. It detects three distinct classes of pathological agent behavior, each representing a different failure mode of probabilistic reasoning systems driving execution loops.
+
+#### 11.2.1 Metric 1: Velocity Spike
+
+A Velocity Spike occurs when an agent submits Intents at a rate that exceeds any legitimate operational profile.
+
+**Detection**: The Gate MUST maintain a sliding-window counter per `(agent_identity, intent_type)` tuple.
+
+| Parameter | Description | RECOMMENDED Default |
+|-----------|-------------|---------------------|
+| `velocity_window` | Duration of the sliding time window. | 1 second |
+| `velocity_max` | Maximum Intents permitted within the window. | 10 |
+| `velocity_burst_tolerance` | Number of consecutive windows that MAY exceed `velocity_max` before triggering. | 1 |
+
+**Trigger condition**: If the Intent count for a given tuple exceeds `velocity_max` for more than `velocity_burst_tolerance` consecutive windows, a Velocity Spike event MUST be raised.
+
+**Rationale**: No legitimate single-agent workflow requires >10 side-effect invocations per second sustained over multiple seconds. Rates exceeding this threshold indicate a reasoning loop, an adversarial prompt injection driving rapid execution, or a misconfigured retry mechanism.
+
+#### 11.2.2 Metric 2: Token Hemorrhage
+
+Token Hemorrhage detects abnormal acceleration in the aggregate size of Intent payloads, indicating loss of coherent reasoning control.
+
+**Detection**: The Gate MUST track the cumulative `parameters` payload size (in bytes) per `agent_identity` across a rolling time window.
+
+| Parameter | Description | RECOMMENDED Default |
+|-----------|-------------|---------------------|
+| `hemorrhage_window` | Duration of the measurement window. | 60 seconds |
+| `hemorrhage_rate_max` | Maximum bytes/second averaged over the window. | 50,000 |
+| `hemorrhage_acceleration_threshold` | Percentage increase in rate between consecutive windows that triggers detection. | 300% |
+
+**Trigger condition**: If the average payload rate exceeds `hemorrhage_rate_max`, OR the rate has increased by more than `hemorrhage_acceleration_threshold` compared to the previous window, a Token Hemorrhage event MUST be raised.
+
+**Rationale**: An agent generating progressively larger payloads at accelerating rates is exhibiting a known failure mode: the LLM is "hallucinating" increasingly verbose outputs into its Intent parameters, often in a self-reinforcing loop. This burns compute and risks writing large volumes of garbage data to external systems.
+
+#### 11.2.3 Metric 3: Semantic Loop
+
+A Semantic Loop occurs when the agent submits Intents that are semantically identical or near-identical to recently submitted Intents — the agentic equivalent of a muscle spasm.
+
+**Detection**: The Gate MUST maintain a buffer of the last N Intents per `(agent_identity, intent_type)` tuple and compute pairwise similarity.
+
+| Parameter | Description | RECOMMENDED Default |
+|-----------|-------------|---------------------|
+| `loop_buffer_size` | Number of recent Intents retained for comparison. | 10 |
+| `loop_similarity_threshold` | Similarity score (0.0–1.0) above which two Intents are considered semantically equivalent. | 0.92 |
+| `loop_consecutive_trigger` | Number of consecutive similar Intents required to trigger detection. | 3 |
+| `loop_similarity_algorithm` | Algorithm used for comparison. | Cosine similarity on normalized `parameters` JSON |
+
+**Trigger condition**: If `loop_consecutive_trigger` or more consecutive Intents from the same tuple exceed `loop_similarity_threshold`, a Semantic Loop event MUST be raised.
+
+**Similarity computation**: Implementations MUST normalize the `parameters` object (sorted keys, trimmed whitespace, lowercased string values) before computing similarity. Implementations MAY use alternative algorithms (Jaccard index, edit distance ratio) provided they meet the detection fidelity requirements.
+
+**Rationale**: An agent that repeatedly requests the same action is stuck. It is not making progress; it is cycling. Allowing the cycle to continue wastes resources and risks duplicating side-effects in external systems.
+
+### 11.3 Spike Severity Classification
+
+When a DSD metric triggers, the Gate MUST classify the event according to its severity level. The severity determines the response action.
+
+| Severity | Condition | Response |
+|----------|-----------|----------|
+| **LEVEL 1 — Warning** | A single metric has crossed its threshold for the first time in the current session. | Log the event. Return `429 SPIKE_DETECTED` with `cooldown_duration`. Reject Intents from the affected tuple for the cooldown period. |
+| **LEVEL 2 — Escalation** | The same metric triggers a second time within 10 minutes of a Level 1 cooldown expiring, OR two distinct metrics trigger simultaneously. | Double the `cooldown_duration`. Notify system operators via configured alerting channels. The Gate SHOULD reject ALL Intent types from the affected `agent_identity`, not just the triggering tuple. |
+| **LEVEL 3 — Critical** | Three distinct metrics trigger simultaneously, OR any metric triggers three times within 30 minutes. | The Gate MUST issue a `KILL` signal to terminate the EEX process serving the affected agent. All in-flight Intents from the agent MUST be discarded. The agent MUST be placed in a `QUARANTINE` state requiring manual operator clearance before resuming. |
+
+### 11.4 Cooldown & Remediation Protocol
+
+#### 11.4.1 Cooldown Behavior
+
+When a spike is detected at any severity level, the following sequence MUST be executed:
+
+1. The Gate MUST immediately cease forwarding Intents from the affected scope (tuple or full agent, depending on severity).
+2. The Gate MUST return a structured error response for every rejected Intent during cooldown:
+
+```json
+{
+  "status": "error",
+  "code": "SPIKE_DETECTED_COOLDOWN",
+  "intent_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "spike_type": "VELOCITY_SPIKE",
+  "severity": 1,
+  "cooldown_remaining_ms": 118500,
+  "message": "DSD triggered: Intent rate exceeded velocity threshold. Cooldown active.",
+  "timestamp": "2026-03-03T09:15:30.500Z"
+}
+```
+
+3. The Gate MUST NOT accept early termination of the cooldown period from the EI layer. Cooldown is non-negotiable.
+4. The Gate MUST log the full spike event, including: the triggering metric, the severity level, the Intent sequence that caused the trigger, and the cooldown duration applied.
+
+#### 11.4.2 Physical Termination (Level 3)
+
+At LEVEL 3 severity, the Gate MUST be capable of issuing a process-level termination signal to the EEX layer:
+
+1. The Gate MUST send a `SIGTERM` (or platform-equivalent) to the EEX process.
+2. If the EEX process does not terminate within 5 seconds, the Gate MUST escalate to `SIGKILL`.
+3. All pending execution results from the terminated process MUST be discarded and logged as `EEX_TERMINATED_BY_DSD`.
+4. The agent MUST be placed in `QUARANTINE` state. The Gate MUST reject all Intents from the quarantined `agent_identity` with error code `AGENT_QUARANTINED` until an operator explicitly clears the quarantine.
+
+#### 11.4.3 Remediation
+
+After a cooldown period expires (Level 1 or Level 2), the circuit breaker resets and the agent MAY resume submitting Intents. However:
+
+1. The Gate SHOULD apply a **decay factor** to the agent's thresholds for a configurable period (RECOMMENDED: 10 minutes), reducing `velocity_max` and `hemorrhage_rate_max` by 50% during recovery.
+2. The Gate MUST retain the spike history for the agent's session. Repeated triggers escalate severity as defined in Section 11.3.
+3. Operators SHOULD be provided with a dashboard or API to inspect spike history, active cooldowns, and quarantined agents.
+
+---
+
+## 12. Conformance
 
 A system is AIP-compliant if and only if it satisfies all of the following:
 
@@ -360,3 +511,4 @@ A system is AIP-compliant if and only if it satisfies all of the following:
 | Version | Date | Description |
 |---------|------|-------------|
 | 0.1.0-draft | 2026-03-03 | Initial draft specification. |
+| 0.1.1-draft | 2026-03-04 | Add Section 10 (MCP Interoperability), Section 11 (Runtime Protection & DSD). Add error codes `EEX_TERMINATED_BY_DSD`, `AGENT_QUARANTINED`. |
